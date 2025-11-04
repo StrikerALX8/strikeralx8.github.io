@@ -37,13 +37,18 @@
 
 <script>
 const username = "strikeralx8"; // GitHub username
-const repo = "strikeralx8.github.io"; // repo name
+const repo = "strikeralx8.github.io"; // Repo name
 const folder = "images";
 
-const brainrots = new Set();
+const brainrotMap = new Map(); // key: lowercase, value: original casing (most capitals)
 const mutations = new Set();
 const traits = new Set();
 let allImages = [];
+
+// helper: count capital letters in a string
+function countCaps(str) {
+  return (str.match(/[A-Z]/g) || []).length;
+}
 
 async function loadImages() {
   const url = `https://api.github.com/repos/${username}/${repo}/contents/${folder}`;
@@ -64,7 +69,6 @@ async function loadImages() {
         if(parts.length === 1){
           brainrotName = parts[0];
         } else if(parts.length === 2){
-          // Decide if it's mutation or trait
           if(parts[1].toLowerCase() === "default") {
             brainrotName = parts[0];
           } else {
@@ -72,13 +76,17 @@ async function loadImages() {
             mutationName = parts[1];
           }
         } else {
-          // More than 2 parts: last part = trait, second last = mutation, rest = brainrot
           traitName = parts[parts.length - 1];
           mutationName = parts[parts.length - 2];
           brainrotName = parts.slice(0, parts.length - 2).join("_");
         }
 
-        brainrots.add(brainrotName);
+        // Merge brainrots case-insensitively, pick version with most capitals
+        const key = brainrotName.toLowerCase();
+        if(!brainrotMap.has(key) || countCaps(brainrotName) > countCaps(brainrotMap.get(key))) {
+          brainrotMap.set(key, brainrotName);
+        }
+
         if(mutationName !== "none") mutations.add(mutationName);
         if(traitName !== "none") traits.add(traitName);
       }
@@ -96,15 +104,20 @@ function populateDropdowns() {
   const mutationSelect = document.getElementById("mutation");
   const traitSelect = document.getElementById("trait");
 
-  brainrots.forEach(b => brainrotSelect.innerHTML += `<option value="${b}">${b}</option>`);
-  mutations.forEach(m => mutationSelect.innerHTML += `<option value="${m}">${m}</option>`);
-  traits.forEach(t => traitSelect.innerHTML += `<option value="${t}">${t}</option>`);
+  // Sort brainrots alphabetically
+  Array.from(brainrotMap.values()).sort().forEach(b => {
+    brainrotSelect.innerHTML += `<option value="${b.toLowerCase()}">${b}</option>`;
+  });
+
+  Array.from(mutations).sort().forEach(m => mutationSelect.innerHTML += `<option value="${m}">${m}</option>`);
+  Array.from(traits).sort().forEach(t => traitSelect.innerHTML += `<option value="${t}">${t}</option>`);
 
   updatePreview();
 }
 
 function updatePreview() {
-  const brainrot = document.getElementById("brainrot").value;
+  const brainrotKey = document.getElementById("brainrot").value;
+  const brainrot = brainrotMap.get(brainrotKey);
   const mutation = document.getElementById("mutation").value;
   const trait = document.getElementById("trait").value;
   const preview = document.getElementById("preview");
