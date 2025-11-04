@@ -1,123 +1,124 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Noobini Brainrot Visualizer</title>
-  <style>
-    body {
-      background-color: #0d1117;
-      color: #e6edf3;
-      font-family: Arial, sans-serif;
-      text-align: center;
-      padding: 40px;
-    }
-    h1 {
-      color: #58a6ff;
-      font-size: 2.5em;
-      margin-bottom: 20px;
-    }
-    p {
-      color: #8b949e;
-      font-size: 1.1em;
-      max-width: 700px;
-      margin: 0 auto 30px auto;
-    }
-    select, button {
-      background: #161b22;
-      color: #e6edf3;
-      border: 1px solid #30363d;
-      padding: 10px 15px;
-      border-radius: 6px;
-      margin: 10px;
-      font-size: 1em;
-      cursor: pointer;
-    }
-    button:hover, select:hover {
-      border-color: #58a6ff;
-    }
-    .preview {
-      margin: 30px auto;
-      width: 300px;
-      height: 300px;
-      background: #161b22;
-      border: 2px solid #30363d;
-      border-radius: 10px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .preview img {
-      max-width: 100%;
-      max-height: 100%;
-      border-radius: 10px;
-    }
-    .info {
-      font-size: 1.1em;
-      margin-top: 15px;
-      color: #8b949e;
-    }
-    .section {
-      margin-top: 30px;
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Steal a Brainrot Visualizer</title>
+<style>
+  body { background-color: #0d1117; color: #e6edf3; font-family: Arial, sans-serif; text-align: center; padding: 40px; }
+  h1 { color: #58a6ff; font-size: 2.5em; margin-bottom: 20px; }
+  select { background: #161b22; color: #e6edf3; border: 1px solid #30363d; padding: 10px 15px; border-radius: 6px; margin: 10px; font-size: 1em; cursor: pointer; }
+  select:hover { border-color: #58a6ff; }
+  .preview { margin: 30px auto; width: 300px; height: 300px; background: #161b22; border: 2px solid #30363d; border-radius: 10px; display: flex; align-items: center; justify-content: center; }
+  .preview img { max-width: 100%; max-height: 100%; border-radius: 10px; }
+  .info { font-size: 1.1em; margin-top: 15px; color: #8b949e; }
+</style>
 </head>
 <body>
-  <h1>Noobini Brainrot Visualizer</h1>
-  <p class="info">
-    Choose a mutation or trait to see how Noobini will look.
-  </p>
+<h1>Steal a Brainrot Visualizer</h1>
+<p class="info">Select a Brainrot, Mutation, or Trait to view its image.</p>
 
-  <div class="section">
-    <label for="mutation">Mutation:</label>
-    <select id="mutation">
-      <option value="none">None</option>
-      <option value="gold">Gold</option>
-      <option value="diamond">Diamond</option>
-      <option value="lava">Lava</option>
-      <option value="rainbow">Rainbow</option>
-      <option value="yingyang">Yin Yang</option>
-    </select>
-    <button onclick="updateMutation()">Show Mutation</button>
-  </div>
+<div>
+  <label for="brainrot">Brainrot:</label>
+  <select id="brainrot" onchange="updatePreview()"></select>
 
-  <div class="section">
-    <label for="trait">Trait:</label>
-    <select id="trait">
-      <option value="none">None</option>
-      <option value="taco">Taco</option>
-    </select>
-    <button onclick="updateTrait()">Show Trait</button>
-  </div>
+  <label for="mutation">Mutation:</label>
+  <select id="mutation" onchange="updatePreview()"><option value="none">None</option></select>
 
-  <div class="preview" id="preview">
-    <p>🧠 select a mutation or trait</p>
-  </div>
+  <label for="trait">Trait:</label>
+  <select id="trait" onchange="updatePreview()"><option value="none">None</option></select>
+</div>
 
-  <p id="label" class="info"></p>
+<div class="preview" id="preview">
+  <p>🧠 select a brainrot, mutation, or trait</p>
+</div>
 
-  <script>
-    const base = "noobini_pizzanini";
+<p id="label" class="info"></p>
 
-    function updateMutation() {
-      const mutation = document.getElementById("mutation").value;
-      const preview = document.getElementById("preview");
-      const label = document.getElementById("label");
+<script>
+const username = "strikeralx8"; // your GitHub username
+const repo = "strikeralx8.github.io"; // your repo name
+const folder = "images";
 
-      let filePath = mutation === "none" ? `images/${base}.png` : `images/${base}_${mutation}.png`;
-      preview.innerHTML = `<img src="${filePath}" alt="${base} ${mutation}">`;
-      label.textContent = `Noobini Pizzanini${mutation !== "none" ? " (" + mutation + ")" : ""}`;
-    }
+const brainrots = new Set();
+const mutations = new Set();
+const traits = new Set();
+let allImages = [];
 
-    function updateTrait() {
-      const trait = document.getElementById("trait").value;
-      const preview = document.getElementById("preview");
-      const label = document.getElementById("label");
+async function loadImages() {
+  const url = `https://api.github.com/repos/${username}/${repo}/contents/${folder}`;
+  try {
+    const res = await fetch(url);
+    const files = await res.json();
 
-      let filePath = trait === "none" ? `images/${base}.png` : `images/${base}_${trait}.png`;
-      preview.innerHTML = `<img src="${filePath}" alt="${base} ${trait}">`;
-      label.textContent = `Noobini Pizzanini${trait !== "none" ? " (" + trait + ")" : ""}`;
-    }
-  </script>
+    files.forEach(file => {
+      if(file.name.endsWith(".png")) {
+        allImages.push(file.name);
+        const name = file.name.replace(".png","");
+        const parts = name.split("_");
+
+        if(parts.length >= 1) brainrots.add(parts[0]);
+        if(parts.length === 3) {
+          mutations.add(parts[1]);
+          traits.add(parts[2]);
+        } else if(parts.length === 2) {
+          if(parts[1] === "default") traits.add(parts[2]);
+          else mutations.add(parts[1]);
+        }
+      }
+    });
+
+    populateDropdowns();
+  } catch (err) {
+    console.error("Error loading images from GitHub API:", err);
+    document.getElementById("preview").innerHTML = "<p>Failed to load images.</p>";
+  }
+}
+
+function populateDropdowns() {
+  const brainrotSelect = document.getElementById("brainrot");
+  const mutationSelect = document.getElementById("mutation");
+  const traitSelect = document.getElementById("trait");
+
+  brainrots.forEach(b => brainrotSelect.innerHTML += `<option value="${b}">${b}</option>`);
+  mutations.forEach(m => mutationSelect.innerHTML += `<option value="${m}">${m}</option>`);
+  traits.forEach(t => traitSelect.innerHTML += `<option value="${t}">${t}</option>`);
+
+  updatePreview();
+}
+
+function updatePreview() {
+  const brainrot = document.getElementById("brainrot").value;
+  const mutation = document.getElementById("mutation").value;
+  const trait = document.getElementById("trait").value;
+  const preview = document.getElementById("preview");
+  const label = document.getElementById("label");
+
+  let filename = brainrot;
+  if(mutation !== "none") filename += `_${mutation}`;
+  else if(trait !== "none") filename += "_default";
+  if(trait !== "none") filename += `_${trait}`;
+  filename += ".png";
+
+  const filePath = `${folder}/${filename}`;
+  if(allImages.includes(filename)) {
+    preview.innerHTML = `<img src="${filePath}" alt="${filename}">`;
+  } else if(allImages.includes(brainrot + ".png")) {
+    preview.innerHTML = `<img src="${folder}/${brainrot}.png" alt="${brainrot}">`;
+    filename = brainrot + ".png";
+  } else {
+    preview.innerHTML = `<p>Image not found</p>`;
+  }
+
+  // Display human-readable label
+  let humanLabel = brainrot.replace(/_/g, " ");
+  if(mutation !== "none") humanLabel += ` (${mutation}`;
+  if(trait !== "none") humanLabel += mutation !== "none" ? ` + ${trait})` : ` (${trait})`;
+  if(mutation === "none" && trait === "none") humanLabel = humanLabel;
+  label.textContent = humanLabel;
+}
+
+loadImages();
+</script>
 </body>
 </html>
