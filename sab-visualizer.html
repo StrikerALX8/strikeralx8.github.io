@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Steal a Brainrot Visualizer</title>
+  <title>Noobini Brainrot Visualizer</title>
   <style>
     body {
       background-color: #0d1117;
@@ -57,23 +57,18 @@
       margin-top: 15px;
       color: #8b949e;
     }
+    .section {
+      margin-top: 30px;
+    }
   </style>
 </head>
 <body>
-  <h1>Steal a Brainrot Visualizer</h1>
+  <h1>Noobini Brainrot Visualizer</h1>
   <p class="info">
-    Choose your Brainrot and mutation to see how it will look.
+    Choose a mutation or trait to see how Noobini will look.
   </p>
 
-  <div>
-    <label for="brainrot">Brainrot:</label>
-    <select id="brainrot">
-      <option value="noobini_pizzanini">Noobini Pizzanini</option>
-      <option value="los_crocodillitos">Los Crocodillitos</option>
-      <option value="squidward">Squidward</option>
-      <option value="mr_clean">Mr Clean</option>
-    </select>
-
+  <div class="section">
     <label for="mutation">Mutation:</label>
     <select id="mutation">
       <option value="none">None</option>
@@ -81,33 +76,47 @@
       <option value="diamond">Diamond</option>
       <option value="lava">Lava</option>
       <option value="rainbow">Rainbow</option>
+      <option value="yingyang">Yin Yang</option>
     </select>
+    <button onclick="updateMutation()">Show Mutation</button>
+  </div>
 
-    <button onclick="updateImage()">Show Brainrot</button>
+  <div class="section">
+    <label for="trait">Trait:</label>
+    <select id="trait">
+      <option value="none">None</option>
+      <option value="taco">Taco</option>
+    </select>
+    <button onclick="updateTrait()">Show Trait</button>
   </div>
 
   <div class="preview" id="preview">
-    <p>🧠 select a brainrot</p>
+    <p>🧠 select a mutation or trait</p>
   </div>
 
-  <p id="label"></p>
+  <p id="label" class="info"></p>
 
   <script>
-    function updateImage() {
-      const brainrot = document.getElementById("brainrot").value;
+    const base = "noobini_pizzanini";
+
+    function updateMutation() {
       const mutation = document.getElementById("mutation").value;
       const preview = document.getElementById("preview");
       const label = document.getElementById("label");
 
-      // image filename pattern: images/brainrot_mutation.png
-      let filePath = `images/${brainrot}_${mutation}.png`;
+      let filePath = mutation === "none" ? `images/${base}.png` : `images/${base}_${mutation}.png`;
+      preview.innerHTML = `<img src="${filePath}" alt="${base} ${mutation}">`;
+      label.textContent = `Noobini Pizzanini${mutation !== "none" ? " (" + mutation + ")" : ""}`;
+    }
 
-      if (mutation === "none") {
-        filePath = `images/${brainrot}.png`;
-      }
+    function updateTrait() {
+      const trait = document.getElementById("trait").value;
+      const preview = document.getElementById("preview");
+      const label = document.getElementById("label");
 
-      preview.innerHTML = `<img src="${filePath}" alt="${brainrot} ${mutation}">`;
-      label.textContent = `${brainrot.replaceAll("_"," ")}${mutation !== "none" ? " ("+mutation+")" : ""}`;
+      let filePath = trait === "none" ? `images/${base}.png` : `images/${base}_${trait}.png`;
+      preview.innerHTML = `<img src="${filePath}" alt="${base} ${trait}">`;
+      label.textContent = `Noobini Pizzanini${trait !== "none" ? " (" + trait + ")" : ""}`;
     }
   </script>
 </body>
