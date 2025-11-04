@@ -40,6 +40,9 @@ const username = "strikeralx8"; // your GitHub username
 const repo = "strikeralx8.github.io"; // your repo name
 const folder = "images";
 
+// Preset Brainrots to include
+const presetBrainrots = ["noobinipizzanini", "bloodrot", "galaxy"];
+
 const brainrots = new Set();
 const mutations = new Set();
 const traits = new Set();
@@ -52,16 +55,17 @@ async function loadImages() {
     const files = await res.json();
 
     files.forEach(file => {
-      if(file.name.endsWith(".png")) {
+      if(file.name.endsWith(".png")){
         allImages.push(file.name);
         const name = file.name.replace(".png","");
         const parts = name.split("_");
 
-        if(parts.length >= 1) brainrots.add(parts[0]);
-        if(parts.length === 3) {
+        // Only include preset brainrots
+        if(parts.length >= 1 && presetBrainrots.includes(parts[0])) brainrots.add(parts[0]);
+        if(parts.length === 3){
           mutations.add(parts[1]);
           traits.add(parts[2]);
-        } else if(parts.length === 2) {
+        } else if(parts.length === 2){
           if(parts[1] === "default") traits.add(parts[2]);
           else mutations.add(parts[1]);
         }
@@ -118,6 +122,7 @@ function updatePreview() {
   label.textContent = humanLabel;
 }
 
+// Load images from GitHub API
 loadImages();
 </script>
 </body>
