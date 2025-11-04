@@ -16,7 +16,7 @@
 </head>
 <body>
 <h1>Steal a Brainrot Visualizer</h1>
-<p class="info">Select a Brainrot, Mutation, or Trait to view its image.</p>
+<p class="info">Select a Brainrot, Mutation, and Traits to view its image.</p>
 
 <div>
   <label for="brainrot">Brainrot:</label>
@@ -25,19 +25,19 @@
   <label for="mutation">Mutation:</label>
   <select id="mutation" onchange="updatePreview()"><option value="none">None</option></select>
 
-  <label for="trait">Trait:</label>
-  <select id="trait" onchange="updatePreview()"><option value="none">None</option></select>
+  <label for="traits">Traits:</label>
+  <select id="traits" multiple size="4" onchange="updatePreview()"></select>
 </div>
 
 <div class="preview" id="preview">
-  <p>🧠 select a brainrot, mutation, or trait</p>
+  <p>🧠 select a brainrot, mutation, or traits</p>
 </div>
 
 <p id="label" class="info"></p>
 
 <script>
 const username = "strikeralx8"; // GitHub username
-const repo = "strikeralx8.github.io"; // repo name
+const repo = "strikeralx8.github.io"; // Repo name
 const folder = "images";
 
 const brainrotMap = new Map(); // key = lowercase, value = brainrot name with most capitals
@@ -45,11 +45,8 @@ const mutations = new Set();
 const traits = new Set();
 let allImages = [];
 
-function countCaps(str) {
-  return (str.match(/[A-Z]/g) || []).length;
-}
+function countCaps(str) { return (str.match(/[A-Z]/g) || []).length; }
 
-// Load images from GitHub
 async function loadImages() {
   const url = `https://api.github.com/repos/${username}/${repo}/contents/${folder}`;
   try {
@@ -64,7 +61,7 @@ async function loadImages() {
 
         let brainrotName = "";
         let mutationName = "none";
-        let traitName = "none";
+        let traitNames = [];
 
         if(parts.length === 1){
           brainrotName = parts[0];
@@ -76,19 +73,19 @@ async function loadImages() {
             mutationName = parts[1];
           }
         } else {
-          traitName = parts[parts.length - 1];
+          traitNames = parts[parts.length - 1].split("-");
           mutationName = parts[parts.length - 2];
           brainrotName = parts.slice(0, parts.length - 2).join("_");
         }
 
-        // Merge by lowercase key, pick the one with the most capitals
+        // Merge Brainrots by lowercase
         const key = brainrotName.toLowerCase();
         if(!brainrotMap.has(key) || countCaps(brainrotName) > countCaps(brainrotMap.get(key))){
           brainrotMap.set(key, brainrotName);
         }
 
         if(mutationName !== "none") mutations.add(mutationName);
-        if(traitName !== "none") traits.add(traitName);
+        traitNames.forEach(t => traits.add(t));
       }
     });
 
@@ -102,15 +99,15 @@ async function loadImages() {
 function populateDropdowns() {
   const brainrotSelect = document.getElementById("brainrot");
   const mutationSelect = document.getElementById("mutation");
-  const traitSelect = document.getElementById("trait");
+  const traitsSelect = document.getElementById("traits");
 
-  // Add unique brainrots sorted
+  // Populate unique Brainrots sorted
   Array.from(brainrotMap.values()).sort().forEach(b => {
     brainrotSelect.innerHTML += `<option value="${b.toLowerCase()}">${b}</option>`;
   });
 
   Array.from(mutations).sort().forEach(m => mutationSelect.innerHTML += `<option value="${m}">${m}</option>`);
-  Array.from(traits).sort().forEach(t => traitSelect.innerHTML += `<option value="${t}">${t}</option>`);
+  Array.from(traits).sort().forEach(t => traitsSelect.innerHTML += `<option value="${t}">${t}</option>`);
 
   updatePreview();
 }
@@ -119,28 +116,29 @@ function updatePreview() {
   const brainrotKey = document.getElementById("brainrot").value;
   const brainrot = brainrotMap.get(brainrotKey);
   const mutation = document.getElementById("mutation").value;
-  const trait = document.getElementById("trait").value;
+  const traitsSelect = document.getElementById("traits");
+  const selectedTraits = Array.from(traitsSelect.selectedOptions).map(opt => opt.value);
   const preview = document.getElementById("preview");
   const label = document.getElementById("label");
 
   let filename = brainrot;
   if(mutation !== "none") filename += `_${mutation}`;
-  else if(trait !== "none") filename += "_default";
-  if(trait !== "none") filename += `_${trait}`;
+  if(selectedTraits.length > 0) filename += `_${selectedTraits.join("-")}`;
   filename += ".png";
 
-  const filePath = `${folder}/${filename}`;
   if(allImages.includes(filename)){
-    preview.innerHTML = `<img src="${filePath}" alt="${filename}">`;
+    preview.innerHTML = `<img src="${folder}/${filename}" alt="${filename}">`;
   } else if(allImages.includes(brainrot + ".png")){
     preview.innerHTML = `<img src="${folder}/${brainrot}.png" alt="${brainrot}">`;
+    filename = brainrot + ".png";
   } else {
     preview.innerHTML = `<p>Image not found</p>`;
   }
 
+  // Human-readable label
   let humanLabel = brainrot.replace(/_/g, " ");
   if(mutation !== "none") humanLabel += ` (${mutation}`;
-  if(trait !== "none") humanLabel += mutation !== "none" ? ` + ${trait})` : ` (${trait})`;
+  if(selectedTraits.length > 0) humanLabel += mutation !== "none" ? ` + ${selectedTraits.join(", ")})` : ` (${selectedTraits.join(", ")})`;
   label.textContent = humanLabel;
 }
 
