@@ -36,12 +36,9 @@
 <p id="label" class="info"></p>
 
 <script>
-const username = "strikeralx8"; // your GitHub username
-const repo = "strikeralx8.github.io"; // your repo name
+const username = "strikeralx8"; // GitHub username
+const repo = "strikeralx8.github.io"; // repo name
 const folder = "images";
-
-// Preset Brainrots to include
-const presetBrainrots = ["noobinipizzanini", "bloodrot", "galaxy"];
 
 const brainrots = new Set();
 const mutations = new Set();
@@ -60,15 +57,30 @@ async function loadImages() {
         const name = file.name.replace(".png","");
         const parts = name.split("_");
 
-        // Only include preset brainrots
-        if(parts.length >= 1 && presetBrainrots.includes(parts[0])) brainrots.add(parts[0]);
-        if(parts.length === 3){
-          mutations.add(parts[1]);
-          traits.add(parts[2]);
+        let brainrotName = "";
+        let mutationName = "none";
+        let traitName = "none";
+
+        if(parts.length === 1){
+          brainrotName = parts[0];
         } else if(parts.length === 2){
-          if(parts[1] === "default") traits.add(parts[2]);
-          else mutations.add(parts[1]);
+          // Decide if it's mutation or trait
+          if(parts[1].toLowerCase() === "default") {
+            brainrotName = parts[0];
+          } else {
+            brainrotName = parts[0];
+            mutationName = parts[1];
+          }
+        } else {
+          // More than 2 parts: last part = trait, second last = mutation, rest = brainrot
+          traitName = parts[parts.length - 1];
+          mutationName = parts[parts.length - 2];
+          brainrotName = parts.slice(0, parts.length - 2).join("_");
         }
+
+        brainrots.add(brainrotName);
+        if(mutationName !== "none") mutations.add(mutationName);
+        if(traitName !== "none") traits.add(traitName);
       }
     });
 
@@ -114,15 +126,13 @@ function updatePreview() {
     preview.innerHTML = `<p>Image not found</p>`;
   }
 
-  // Display human-readable label
+  // Human-readable label
   let humanLabel = brainrot.replace(/_/g, " ");
   if(mutation !== "none") humanLabel += ` (${mutation}`;
   if(trait !== "none") humanLabel += mutation !== "none" ? ` + ${trait})` : ` (${trait})`;
-  if(mutation === "none" && trait === "none") humanLabel = humanLabel;
   label.textContent = humanLabel;
 }
 
-// Load images from GitHub API
 loadImages();
 </script>
 </body>
