@@ -37,19 +37,19 @@
 
 <script>
 const username = "strikeralx8"; // GitHub username
-const repo = "strikeralx8.github.io"; // Repo name
+const repo = "strikeralx8.github.io"; // repo name
 const folder = "images";
 
-const brainrotMap = new Map(); // key: lowercase, value: original casing (most capitals)
+const brainrotMap = new Map(); // key = lowercase, value = brainrot name with most capitals
 const mutations = new Set();
 const traits = new Set();
 let allImages = [];
 
-// helper: count capital letters in a string
 function countCaps(str) {
   return (str.match(/[A-Z]/g) || []).length;
 }
 
+// Load images from GitHub
 async function loadImages() {
   const url = `https://api.github.com/repos/${username}/${repo}/contents/${folder}`;
   try {
@@ -81,9 +81,9 @@ async function loadImages() {
           brainrotName = parts.slice(0, parts.length - 2).join("_");
         }
 
-        // Merge brainrots case-insensitively, pick version with most capitals
+        // Merge by lowercase key, pick the one with the most capitals
         const key = brainrotName.toLowerCase();
-        if(!brainrotMap.has(key) || countCaps(brainrotName) > countCaps(brainrotMap.get(key))) {
+        if(!brainrotMap.has(key) || countCaps(brainrotName) > countCaps(brainrotMap.get(key))){
           brainrotMap.set(key, brainrotName);
         }
 
@@ -93,8 +93,8 @@ async function loadImages() {
     });
 
     populateDropdowns();
-  } catch (err) {
-    console.error("Error loading images from GitHub API:", err);
+  } catch(err){
+    console.error("Error loading images:", err);
     document.getElementById("preview").innerHTML = "<p>Failed to load images.</p>";
   }
 }
@@ -104,7 +104,7 @@ function populateDropdowns() {
   const mutationSelect = document.getElementById("mutation");
   const traitSelect = document.getElementById("trait");
 
-  // Sort brainrots alphabetically
+  // Add unique brainrots sorted
   Array.from(brainrotMap.values()).sort().forEach(b => {
     brainrotSelect.innerHTML += `<option value="${b.toLowerCase()}">${b}</option>`;
   });
@@ -130,16 +130,14 @@ function updatePreview() {
   filename += ".png";
 
   const filePath = `${folder}/${filename}`;
-  if(allImages.includes(filename)) {
+  if(allImages.includes(filename)){
     preview.innerHTML = `<img src="${filePath}" alt="${filename}">`;
-  } else if(allImages.includes(brainrot + ".png")) {
+  } else if(allImages.includes(brainrot + ".png")){
     preview.innerHTML = `<img src="${folder}/${brainrot}.png" alt="${brainrot}">`;
-    filename = brainrot + ".png";
   } else {
     preview.innerHTML = `<p>Image not found</p>`;
   }
 
-  // Human-readable label
   let humanLabel = brainrot.replace(/_/g, " ");
   if(mutation !== "none") humanLabel += ` (${mutation}`;
   if(trait !== "none") humanLabel += mutation !== "none" ? ` + ${trait})` : ` (${trait})`;
